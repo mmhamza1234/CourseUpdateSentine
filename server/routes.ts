@@ -7,15 +7,7 @@ import { startMonitoringJobs } from "./jobs/monitoring-cron";
 import { insertVendorSchema, insertSourceSchema, insertModuleSchema, insertAssetSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication middleware
-  const requireAuth = async (req: any, res: any, next: any) => {
-    const user = await authService.getCurrentUser(req.headers.authorization);
-    if (!user) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-    req.user = user;
-    next();
-  };
+  // Authentication disabled for single-user tool
 
   // Auth routes
   app.post("/api/auth/request-magic-link", async (req, res) => {
@@ -48,12 +40,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/auth/me", requireAuth, async (req: any, res) => {
+  app.get("/api/auth/me", async (req: any, res) => {
     res.json({ user: req.user });
   });
 
   // Dashboard stats
-  app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
+  app.get("/api/dashboard/stats", async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);
@@ -63,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Vendors
-  app.get("/api/vendors", requireAuth, async (req, res) => {
+  app.get("/api/vendors", async (req, res) => {
     try {
       const vendors = await storage.getVendors();
       res.json(vendors);
@@ -72,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/vendors", requireAuth, async (req, res) => {
+  app.post("/api/vendors", async (req, res) => {
     try {
       const validatedData = insertVendorSchema.parse(req.body);
       const vendor = await storage.createVendor(validatedData);
@@ -82,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/vendors/:id", requireAuth, async (req, res) => {
+  app.put("/api/vendors/:id", async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertVendorSchema.partial().parse(req.body);
@@ -93,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/vendors/:id", requireAuth, async (req, res) => {
+  app.delete("/api/vendors/:id", async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteVendor(id);
@@ -104,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sources
-  app.get("/api/sources", requireAuth, async (req, res) => {
+  app.get("/api/sources", async (req, res) => {
     try {
       const sources = await storage.getSources();
       res.json(sources);
@@ -113,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/sources", requireAuth, async (req, res) => {
+  app.post("/api/sources", async (req, res) => {
     try {
       const validatedData = insertSourceSchema.parse(req.body);
       const source = await storage.createSource(validatedData);
@@ -123,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/sources/:id", requireAuth, async (req, res) => {
+  app.put("/api/sources/:id", async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertSourceSchema.partial().parse(req.body);
@@ -135,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Modules
-  app.get("/api/modules", requireAuth, async (req, res) => {
+  app.get("/api/modules", async (req, res) => {
     try {
       const modules = await storage.getModules();
       res.json(modules);
@@ -144,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/modules", requireAuth, async (req, res) => {
+  app.post("/api/modules", async (req, res) => {
     try {
       const validatedData = insertModuleSchema.parse(req.body);
       const module = await storage.createModule(validatedData);
@@ -155,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Assets
-  app.get("/api/assets", requireAuth, async (req, res) => {
+  app.get("/api/assets", async (req, res) => {
     try {
       const assets = await storage.getAssets();
       res.json(assets);
@@ -164,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/assets", requireAuth, async (req, res) => {
+  app.post("/api/assets", async (req, res) => {
     try {
       const validatedData = insertAssetSchema.parse(req.body);
       const asset = await storage.createAsset(validatedData);
@@ -175,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Change Events
-  app.get("/api/events", requireAuth, async (req, res) => {
+  app.get("/api/events", async (req, res) => {
     try {
       const { limit } = req.query;
       const events = await storage.getChangeEvents(limit ? parseInt(limit as string) : undefined);
@@ -186,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Impacts
-  app.get("/api/impacts", requireAuth, async (req, res) => {
+  app.get("/api/impacts", async (req, res) => {
     try {
       const impacts = await storage.getImpacts();
       res.json(impacts);
@@ -195,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/impacts/pending", requireAuth, async (req, res) => {
+  app.get("/api/impacts/pending", async (req, res) => {
     try {
       const impacts = await storage.getPendingImpacts();
       res.json(impacts);
@@ -204,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/impacts/:id/approve", requireAuth, async (req: any, res) => {
+  app.post("/api/impacts/:id/approve", async (req: any, res) => {
     try {
       const { id } = req.params;
       const impact = await storage.approveImpact(id, req.user.id);
@@ -218,7 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/impacts/:id/reject", requireAuth, async (req: any, res) => {
+  app.post("/api/impacts/:id/reject", async (req: any, res) => {
     try {
       const { id } = req.params;
       const impact = await storage.rejectImpact(id, req.user.id);
@@ -229,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tasks
-  app.get("/api/tasks", requireAuth, async (req, res) => {
+  app.get("/api/tasks", async (req, res) => {
     try {
       const { status, owner } = req.query;
       let tasks;
@@ -248,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/tasks/:id", requireAuth, async (req, res) => {
+  app.put("/api/tasks/:id", async (req, res) => {
     try {
       const { id } = req.params;
       const task = await storage.updateTask(id, req.body);
@@ -259,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual trigger for monitoring
-  app.post("/api/monitoring/trigger", requireAuth, async (req, res) => {
+  app.post("/api/monitoring/trigger", async (req, res) => {
     try {
       // This would trigger a manual monitoring run
       res.json({ message: "Manual monitoring triggered" });

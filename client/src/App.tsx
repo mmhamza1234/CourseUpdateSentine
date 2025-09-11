@@ -17,25 +17,7 @@ import Assets from "@/pages/Assets";
 import Settings from "@/pages/Settings";
 
 function AuthenticatedRoutes() {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <div className="w-4 h-4 bg-primary-foreground rounded" />
-          </div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
-  }
-
+  // Skip authentication - go directly to main app
   return (
     <div className="min-h-screen bg-background">
       <BrandNav />
