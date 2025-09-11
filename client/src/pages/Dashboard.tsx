@@ -17,7 +17,9 @@ import {
   Settings,
   ExternalLink,
   Play,
-  RefreshCw
+  RefreshCw,
+  Brain,
+  Loader2
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -57,20 +59,24 @@ export default function Dashboard() {
   const { toast } = useToast();
 
   const manualRunMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/monitoring/manual-run"),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/monitoring/manual-run");
+      return response.json();
+    },
+    onSuccess: (data) => {
       toast({
-        title: "Manual monitoring started",
-        description: "Checking all active sources for updates. This may take a few minutes.",
+        title: "Manual monitoring completed ✅",
+        description: `Processed ${data.processedSources || 0} sources, found ${data.foundChanges || 0} changes from ${data.totalActiveSources || 0} active sources.`,
       });
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/impacts/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sources"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Manual monitoring failed",
+        title: "Manual monitoring failed ❌",
         description: error.message || "Failed to start manual monitoring. Please try again.",
         variant: "destructive",
       });
@@ -128,19 +134,28 @@ export default function Dashboard() {
             <p className="text-muted-foreground">Monitor AI tool updates and course impact</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Button 
-              onClick={() => manualRunMutation.mutate()}
-              disabled={manualRunMutation.isPending}
-              className="btn-primary"
-              data-testid="button-manual-run"
-            >
-              {manualRunMutation.isPending ? (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Play className="w-4 h-4 mr-2" />
+            <div className="flex items-center space-x-3">
+              <Button 
+                onClick={() => manualRunMutation.mutate()}
+                disabled={manualRunMutation.isPending}
+                className="btn-primary"
+                data-testid="button-manual-run"
+              >
+                {manualRunMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                {manualRunMutation.isPending ? "Running..." : "Manual Run"}
+              </Button>
+              
+              {manualRunMutation.isPending && (
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground animate-pulse">
+                  <Brain className="w-4 h-4 animate-pulse" />
+                  <span>Thinking... Checking sources</span>
+                </div>
               )}
-              {manualRunMutation.isPending ? "Running..." : "Manual Run"}
-            </Button>
+            </div>
             <div className="text-sm text-muted-foreground">
               Last updated: <span data-testid="text-last-update">{new Date().toLocaleString("en-GB", { timeZone: "Africa/Cairo" })}</span>
             </div>
