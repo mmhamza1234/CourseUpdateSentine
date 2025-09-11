@@ -1,0 +1,71 @@
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { RtlProvider } from "@/hooks/use-rtl";
+import BrandNav from "@/components/BrandNav";
+import NotFound from "@/pages/not-found";
+import Auth from "@/pages/Auth";
+import Dashboard from "@/pages/Dashboard";
+import Events from "@/pages/Events";
+import Impacts from "@/pages/Impacts";
+import Tasks from "@/pages/Tasks";
+import Watchlist from "@/pages/Watchlist";
+import Assets from "@/pages/Assets";
+import Settings from "@/pages/Settings";
+
+function AuthenticatedRoutes() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <div className="w-4 h-4 bg-primary-foreground rounded" />
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <BrandNav />
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/events" component={Events} />
+        <Route path="/impacts" component={Impacts} />
+        <Route path="/tasks" component={Tasks} />
+        <Route path="/watchlist" component={Watchlist} />
+        <Route path="/assets" component={Assets} />
+        <Route path="/settings" component={Settings} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <RtlProvider>
+          <AuthProvider>
+            <AuthenticatedRoutes />
+            <Toaster />
+          </AuthProvider>
+        </RtlProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
