@@ -1,0 +1,58 @@
+DO_NOT_START: WAIT_MODE=ON
+After parsing this, reply "READY_TO_RUN". Do NOT scaffold until I send the single word: RUN.
+
+PRISMA ENTITIES
+Vendor, Source(RSS|HTML|API, cssSelector optional, bridgeToggle), Module(M1..M9),
+Asset(moduleId, lessonCode, assetType, sensitivity, toolDependency, triggerTags, link, version, lastReviewed, nextDue),
+ChangeEvent(vendorId, sourceId, title, url, publishedAt, raw, summary, embeddings, createdAt),
+Impact(changeEventId, assetId, predictedAction, severity, confidence, reasons, status, decidedBy, decidedAt),
+Task(impactId, action, owner, dueDate, status, evidenceUrl),
+DecisionRule(pattern, action, severity, modules, notes),
+SLA(severity, patchWithinHours, comms),
+NotificationLog, AuditLog.
+
+BACKEND FLOWS
+Fetchers: RSS parse; HTML fetch+selector; dedup by URL hash; store raw snapshot.
+LLM: 
+- CHANGE_SUMMARY_PROMPT → {summary, change_type:[capability|ui|policy|pricing|api|deprecation], entities:[], risks:[], summary_ar}.
+- IMPACT_CLASSIFIER_PROMPT → impacts[] per Asset (predicted_action FACE_RESHOOT|SCREEN_REDO|SLIDES_EDIT|POLICY_NOTE; severity SEV1|SEV2|SEV3; confidence; reasons[]). Use Rules + heuristics.
+- TASK_BUNDLE_PROMPT → concrete tasks with owners (HAMADA/EMAN/EDITOR) and due dates within SLA (Africa/Cairo).
+- PATCH_SCRIPT_PROMPT → ≤90s outline for FACE/SCREEN.
+
+HEURISTICS
+- Core feature rename or reordered steps → SCREEN_REDO; if name spoken on camera/marketing → also FACE_RESHOOT.
+- New mandatory safety/policy → POLICY_NOTE (SEV1 if blocking).
+- Cosmetic UI → SLIDES_EDIT (SEV3) unless demo breaks.
+- New recommended capability → SCREEN_REDO (SEV2).
+- Connector deprecated (M2/M3/M4) → SCREEN_REDO (SEV1).
+- Reader/Research limits change → SLIDES_EDIT (SEV2) + worksheet tweak.
+- Free tier/pricing change → POLICY_NOTE (SEV2).
+
+SCHEDULER
+- Cron daily OpenAI watch @ 09:30 Africa/Cairo.
+- Cron weekly digest @ 09:00 Monday Africa/Cairo.
+- Retries: exponential; circuit-break per Source.
+
+NOTIFICATIONS
+- SEV1 subject: "⚠️ [SEV1] {vendor}: {title} → {modules}"
+- Digest subject: "Course Update Digest — {week_start}"
+- Include Approve/Reject deep links.
+
+UI PAGES (brand look)
+- BrandNav (logo, orange underline, RTL toggle).
+- Dashboard: counts by severity; next SLA breach.
+- Watchlist CRUD (URL, type, cssSelector, bridgeToggle).
+- Events list/detail (diff vs last snapshot; linked impacts).
+- Impacts board (Pending/Approved/Rejected) with Approve/Reject + reason.
+- Tasks Kanban (Open/In Progress/Blocked/Done) w/ evidence link.
+- Assets Registry (sensitivity, toolDependency, version bump).
+- Reports (SLA compliance; mean time-to-patch; most impacted modules).
+- Settings (Owners, SLA, Channels, Timezone).
+- Accessibility: color-independent indicators; Arabic labels in RTL.
+
+DELIVERABLES
+- Generate: prisma schema & migration; seed from inline CSV/JSON; Tailwind brand config; components; cron jobs; queue workers; OpenAPI docs; docker-compose (web, db, redis); README + .env.example.
+- Security: respect robots.txt; rate-limit; no key in client; mask secrets in logs.
+
+FINAL INSTRUCTION
+Remain idle until I send: RUN

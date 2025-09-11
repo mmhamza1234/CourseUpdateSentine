@@ -1,0 +1,48 @@
+DO_NOT_START: WAIT_MODE=ON
+Action: Ingest these seeds into the DB. Then reply "SEEDS_LOADED_WAITING".
+
+### Modules.csv
+Code,Title,Hours,Notes
+M1,The AI Revolution at Work,5,Timeless drivers and ROI basics
+M2,Deep Dive into ChatGPT & Customization,10,ChatGPT core; Agents; Connectors; Custom GPTs
+M3,Workflow Prompting & Productivity,10,Prompting; chaining; efficiency
+M4,AI Automations & Orchestration,10,n8n/Make/Zapier patterns
+M5,Data Workflows & Analytics,10,Sheets + ChatGPT; dashboards
+M6,Research Mode, Reader & File Tools,10,Reader/Research Mode; citations
+M7,AI for Marketing & Content Creation,10,CapCut; Canva; Gamma; ElevenLabs
+M8,Customer Ops & Support Assistants,10,Retrieval; KB; support flows
+M9,Sales, CRM & Outreach Automation,10,Leads; enrichment; CRM; forecasting
+
+### Assets.csv
+Module,LessonCode,AssetType,ToolDependency,Sensitivity,TriggerTags,Link,Version
+M2,L2,SLIDES,ChatGPT-Core,High,"capability,ui,policy",,v1.0
+M2,L3,TOOL_CLIP,ChatGPT-Agents/Connectors,High,"capability,ui,api",,v1.0
+M3,All,SLIDES,ChatGPT,Medium,"capability",,v1.0
+M4,All,TOOL_CLIP,n8n,High,"api,ui",,v1.0
+M5,All,SLIDES,Sheets/ChatGPT,Low,"none",,v1.0
+M6,All,TOOL_CLIP,ChatGPT-Reader,High,"capability,reader",,v1.0
+M7,All,SCREEN_DEMO,CapCut/ElevenLabs,Medium,"ui,pricing",,v1.0
+M8,All,TOOL_CLIP,ChatGPT-Retrieval,High,"retrieval,policy,ui",,v1.0
+M9,All,SCREEN_DEMO,Gmail/ChatGPT,Medium,"policy,api",,v1.0
+
+### Watchlist.csv
+Vendor,SourceName,URL,Type,Importance,Tags
+OpenAI ChatGPT,ChatGPT Release Notes,,HTML,High,"research,agents,connectors,gpts,reader,policy,pricing"
+OpenAI Platform,Platform Changelog,,HTML,High,"models,pricing,api,deprecation,policy"
+n8n,n8n Changelog,,GitHub,High,"n8n,http,auth,triggers"
+Notion,Notion Updates,,HTML,Medium,"docs,db,api,ui"
+Canva,Canva Updates,,HTML,Medium,"export,brand,ui"
+Gamma,Gamma Updates,,HTML,Low,"decks,export,ui"
+CapCut,CapCut Updates,,HTML,Low,"captions,export,ui"
+ElevenLabs,ElevenLabs Changelog,,HTML,Medium,"voices,pricing,ui"
+Google Workspace,Workspace Updates,,HTML,Medium,"sheets,policy,security"
+W3Techs,Language Share,,HTML,Low,"arabic-content-share"
+
+### Rules.json
+[
+ {"pattern":"agent mode rename|assistants builder|tool runner","action":"FACE_RESHOOT+SCREEN_REDO","severity":"SEV1","modules":["M2","M8"],"notes":"Core feature rename breaks narration and demo"},
+ {"pattern":"research mode limit|reader file limit|web browse cap","action":"SLIDES_EDIT","severity":"SEV2","modules":["M6"],"notes":"Revise slides/worksheet for new limits"},
+ {"pattern":"connector deprecated|new connector policy","action":"SCREEN_REDO","severity":"SEV1","modules":["M2","M3","M4"],"notes":"Deprecation breaks connector demos"},
+ {"pattern":"pricing plan limit|free tier change","action":"POLICY_NOTE","severity":"SEV2","modules":["M7","M8","M9"],"notes":"Pricing caveats for learners"},
+ {"pattern":"ui overhaul|workflow changed","action":"SCREEN_REDO","severity":"SEV2","modules":["M2","M3","M4","M5"],"notes":"Click-path changed"}
+]
