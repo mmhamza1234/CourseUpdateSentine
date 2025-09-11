@@ -14,6 +14,7 @@ import Impacts from "@/pages/Impacts";
 import Tasks from "@/pages/Tasks";
 import Watchlist from "@/pages/Watchlist";
 import Assets from "@/pages/Assets";
+import Reference from "@/pages/Reference";
 import Settings from "@/pages/Settings";
 
 function AuthenticatedRoutes() {
@@ -28,6 +29,7 @@ function AuthenticatedRoutes() {
         <Route path="/tasks" component={Tasks} />
         <Route path="/watchlist" component={Watchlist} />
         <Route path="/assets" component={Assets} />
+        <Route path="/reference" component={Reference} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>

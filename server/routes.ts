@@ -4,10 +4,12 @@ import { storage } from "./storage";
 import { authService } from "./services/auth";
 import { queueImpactClassification, queueTaskGeneration } from "./jobs/queue-worker";
 import { startMonitoringJobs } from "./jobs/monitoring-cron";
+import { MonitoringService } from "./services/monitoring";
 import { insertVendorSchema, insertSourceSchema, insertModuleSchema, insertAssetSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication disabled for single-user tool
+  const monitoringService = new MonitoringService();
 
   // Auth routes
   app.post("/api/auth/request-magic-link", async (req, res) => {
@@ -251,10 +253,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual trigger for monitoring
-  app.post("/api/monitoring/trigger", async (req, res) => {
+  app.post("/api/monitoring/manual-run", async (req, res) => {
     try {
-      // This would trigger a manual monitoring run
-      res.json({ message: "Manual monitoring triggered" });
+      // Get all active sources
+      const sources = await storage.getSources();
+      const activeSources = sources.filter((source: any) => source.isActive && source.bridgeToggle);
+      
+      if (activeSources.length === 0) {
+        return res.json({ 
+          message: "No active sources found to monitor",
+          sourceCount: 0 
+        });
+      }
+
+      // Trigger monitoring for each active source
+      let processedSources = 0;
+      let foundChanges = 0;
+      
+      for (const source of activeSources) {
+        try {
+          const results = await monitoringService.fetchSource({
+            url: source.url,
+            type: source.type,
+            cssSelector: source.cssSelector
+          });
+          
+          processedSources++;
+          
+          // Here you could store the results or trigger further processing
+          if (results && results.length > 0) {
+            foundChanges += results.length;
+          }
+          
+        } catch (sourceError) {
+          console.error(`Failed to monitor source ${source.name}:`, sourceError);
+        }
+      }
+      
+      res.json({ 
+        message: "Manual monitoring completed",
+        processedSources,
+        foundChanges,
+        totalActiveSources: activeSources.length
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

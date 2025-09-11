@@ -1,11 +1,13 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SeverityPill from "@/components/SeverityPill";
 import ModuleBadge from "@/components/ModuleBadge";
 import TaskCard from "@/components/TaskCard";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   AlertTriangle, 
   Clock, 
@@ -13,7 +15,9 @@ import {
   Target, 
   Plus,
   Settings,
-  ExternalLink
+  ExternalLink,
+  Play,
+  RefreshCw
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -48,6 +52,29 @@ export default function Dashboard() {
 
   const { data: sources, isLoading: sourcesLoading } = useQuery({
     queryKey: ["/api/sources"],
+  });
+
+  const { toast } = useToast();
+
+  const manualRunMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/monitoring/manual-run"),
+    onSuccess: () => {
+      toast({
+        title: "Manual monitoring started",
+        description: "Checking all active sources for updates. This may take a few minutes.",
+      });
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/impacts/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Manual monitoring failed",
+        description: error.message || "Failed to start manual monitoring. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   if (statsLoading) {
@@ -100,8 +127,23 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
             <p className="text-muted-foreground">Monitor AI tool updates and course impact</p>
           </div>
-          <div className="text-sm text-muted-foreground">
-            Last updated: <span data-testid="text-last-update">{new Date().toLocaleString("en-GB", { timeZone: "Africa/Cairo" })}</span>
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={() => manualRunMutation.mutate()}
+              disabled={manualRunMutation.isPending}
+              className="btn-primary"
+              data-testid="button-manual-run"
+            >
+              {manualRunMutation.isPending ? (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4 mr-2" />
+              )}
+              {manualRunMutation.isPending ? "Running..." : "Manual Run"}
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              Last updated: <span data-testid="text-last-update">{new Date().toLocaleString("en-GB", { timeZone: "Africa/Cairo" })}</span>
+            </div>
           </div>
         </div>
         
