@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret";
 const MAGIC_LINK_SECRET = process.env.MAGIC_LINK_SECRET || "your-magic-link-secret";
 
 // Configure SMTP transporter
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT || "587"),
   secure: false, // true for 465, false for other ports

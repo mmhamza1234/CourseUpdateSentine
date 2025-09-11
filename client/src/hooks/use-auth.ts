@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext, createContext } from "react";
 import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -100,7 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     verifyMagicLink,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    React.createElement(AuthContext.Provider, { value: value }, children)
+  );
 }
 
 export function useAuth() {

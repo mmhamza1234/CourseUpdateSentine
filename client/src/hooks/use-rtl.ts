@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
 interface RtlContextType {
   isRtl: boolean;
@@ -42,7 +42,9 @@ export function RtlProvider({ children }: { children: React.ReactNode }) {
     toggleRtl,
   };
 
-  return <RtlContext.Provider value={value}>{children}</RtlContext.Provider>;
+  return (
+    React.createElement(RtlContext.Provider, { value: value }, children)
+  );
 }
 
 export function useRtl() {
