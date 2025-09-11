@@ -1,0 +1,11 @@
+Vendor,SourceName,URL,Type,Importance,Tags
+OpenAI ChatGPT,ChatGPT Release Notes,,HTML,High,"research,agents,connectors,gpts,reader,policy,pricing"
+OpenAI Platform,Platform Changelog,,HTML,High,"models,pricing,api,deprecation,policy"
+n8n,n8n Changelog,,GitHub,High,"n8n,http,auth,triggers"
+Notion,Notion Updates,,HTML,Medium,"docs,db,api,ui"
+Canva,Canva Updates,,HTML,Medium,"export,brand,ui"
+Gamma,Gamma Updates,,HTML,Low,"decks,export,ui"
+CapCut,CapCut Updates,,HTML,Low,"captions,export,ui"
+ElevenLabs,ElevenLabs Changelog,,HTML,Medium,"voices,pricing,ui"
+Google Workspace,Workspace Updates,,HTML,Medium,"sheets,policy,security"
+W3Techs,Language Share,,HTML,Low,arabic-content-share
